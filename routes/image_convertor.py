@@ -32,5 +32,6 @@ async def convert_image(
         )
 
     except Exception as e:
-        print("Conversion Error:", e)  # 🪵 Optional debug log
+        print("🔥 Internal Server Error:", str(e))  # ✅ Add this line
         raise HTTPException(status_code=500, detail=str(e))
+
