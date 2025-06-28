@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from routes.image_convertor import router as image_converter_router
 from routes.video_convertor import router as video_converter_router
+from routes.color_palette import router as color_palette_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -21,3 +22,4 @@ app.add_middleware(
 # ✅ Register image conversion router
 app.include_router(image_converter_router, prefix="/image", tags=["Image Tools"])
 app.include_router(video_converter_router, prefix="/video", tags=["Video Tools"])
+app.include_router(color_palette_router, prefix="/color", tags=["Color Tools"])
