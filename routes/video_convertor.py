@@ -19,30 +19,22 @@ async def convert_video(
     try:
         os.makedirs("static", exist_ok=True)
 
-        # === 📥 DEBUG LOGS ===
-        print("📥 Received video for conversion:", file.filename)
-        print("🎯 Target format:", target_format)
-
-        # Save uploaded file temporarily
+        # 📥 Save uploaded file
         temp_input_path = f"static/{uuid4()}_{file.filename}"
         with open(temp_input_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # Generate output filename and path
+        # 🎯 Prepare output path
         output_filename = f"{uuid4()}.{target_format.lower()}"
         output_path = f"static/{output_filename}"
 
-        # Convert using FFmpeg
+        # 🧠 Convert video
         await convert_video_format(temp_input_path, output_path)
 
-        # Log output size
-        if os.path.exists(output_path):
-            print(f"✅ Output file created: {output_filename}, Size: {os.path.getsize(output_path)} bytes")
-        else:
-            print(f"❌ Output file not created: {output_filename}")
+        if not os.path.exists(output_path):
+            raise HTTPException(status_code=500, detail="Video conversion failed")
 
-        # Clean up input file
-        os.remove(temp_input_path)
+        os.remove(temp_input_path)  # 🧹 Cleanup input
 
         return FileResponse(
             path=output_path,
