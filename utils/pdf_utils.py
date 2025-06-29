@@ -28,8 +28,8 @@ async def split_pdf_by_page_range(input_path, output_path, start, end):
 async def compress_pdf(input_path, output_path):
     try:
         with pikepdf.open(input_path) as pdf:
-            # Optimize and remove unused objects
-            pdf.save(output_path, optimize_version=True)
+            # Save with object stream compression (default behavior)
+            pdf.save(output_path)  # Removed unsupported optimize_version
     except Exception as e:
         raise RuntimeError(f"Compression failed: {str(e)}")
 
