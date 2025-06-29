@@ -1,10 +1,61 @@
-from PyPDF2 import PdfMerger
+from PyPDF2 import PdfMerger, PdfReader, PdfWriter
+from PIL import Image
+import fitz  # PyMuPDF
 import os
+import io
 
-async def merge_pdfs(pdf_paths: list, output_path: str):
+async def merge_pdfs(file_paths, output_path):
     merger = PdfMerger()
-    for path in pdf_paths:
+    for path in file_paths:
         merger.append(path)
-    with open(output_path, 'wb') as f_out:
-        merger.write(f_out)
+    merger.write(output_path)
     merger.close()
+
+async def split_pdf_by_page_range(input_path, output_path, start, end):
+    reader = PdfReader(input_path)
+    writer = PdfWriter()
+
+    for i in range(start - 1, end):
+        if i < len(reader.pages):
+            writer.add_page(reader.pages[i])
+        else:
+            raise ValueError("Page range is out of bounds.")
+
+    with open(output_path, "wb") as f:
+        writer.write(f)
+
+async def compress_pdf(input_path, output_path):
+    reader = PdfReader(input_path)
+    writer = PdfWriter()
+
+    for page in reader.pages:
+        writer.add_page(page)
+
+    with open(output_path, "wb") as f:
+        writer.write(f)
+
+async def images_to_pdf(upload_files, output_path):
+    image_list = []
+
+    for upload_file in upload_files:
+        contents = await upload_file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        image_list.append(image)
+
+    if not image_list:
+        raise ValueError("No valid images provided.")
+
+    image_list[0].save(output_path, save_all=True, append_images=image_list[1:])
+
+async def pdf_to_images(input_path):
+    doc = fitz.open(input_path)
+    image_paths = []
+
+    for i in range(len(doc)):
+        page = doc[i]
+        pix = page.get_pixmap(dpi=200)
+        image_path = f"static/page_{i + 1}.png"
+        pix.save(image_path)
+        image_paths.append(image_path)
+
+    return image_paths
