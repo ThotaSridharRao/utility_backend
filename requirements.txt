@@ -7,3 +7,4 @@ colorthief
 PyMuPDF==1.23.7
 PyPDF2==3.0.1
 reportlab==4.0.8
+pikepdf

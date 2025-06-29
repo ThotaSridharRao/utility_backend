@@ -1,6 +1,7 @@
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 from PIL import Image
 import fitz  # PyMuPDF
+import pikepdf
 import os
 import io
 
@@ -25,14 +26,12 @@ async def split_pdf_by_page_range(input_path, output_path, start, end):
         writer.write(f)
 
 async def compress_pdf(input_path, output_path):
-    reader = PdfReader(input_path)
-    writer = PdfWriter()
-
-    for page in reader.pages:
-        writer.add_page(page)
-
-    with open(output_path, "wb") as f:
-        writer.write(f)
+    try:
+        with pikepdf.open(input_path) as pdf:
+            # Optimize and remove unused objects
+            pdf.save(output_path, optimize_version=True)
+    except Exception as e:
+        raise RuntimeError(f"Compression failed: {str(e)}")
 
 async def images_to_pdf(upload_files, output_path):
     image_list = []
